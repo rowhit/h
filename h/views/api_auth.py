@@ -65,7 +65,7 @@ class OAuthAuthorizeController(object):
         user = self.user_svc.fetch(self.request.authenticated_userid)
         credentials = {'user': user}
 
-        headers, body, status = self.oauth.create_authorization_response(
+        headers, _, status = self.oauth.create_authorization_response(
                 self.request.url, scopes=scopes, credentials=credentials)
 
         if 'Location' in headers:
