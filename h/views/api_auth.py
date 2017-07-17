@@ -68,11 +68,11 @@ class OAuthAuthorizeController(object):
         headers, _, status = self.oauth.create_authorization_response(
                 self.request.url, scopes=scopes, credentials=credentials)
 
-        if 'Location' in headers:
-            return exception_response(status, location=headers['Location'])
-        else:
-            log.error('Created OAuth 2 authorization code, but got no redirect location')
-            raise HTTPInternalServerError()
+        try:
+            return HTTPFound(location=headers['Location'])
+        except KeyError:
+            client_id = self.request.params.get('client_id')
+            raise RuntimeError('created authorisation code for client "{}" but got no redirect location'.format(client_id))
 
 
 @view_defaults(renderer='h:templates/oauth/error.html.jinja2')
