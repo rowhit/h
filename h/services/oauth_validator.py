@@ -11,6 +11,7 @@ from h import models
 from h.util.db import lru_cache_in_transaction
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
+DEFAULT_SCOPES = ['annotation:read', 'annotation:write']
 
 
 class OAuthValidatorService(RequestValidator):
@@ -37,7 +38,7 @@ class OAuthValidatorService(RequestValidator):
 
     def get_default_scopes(self, client_id, request, *args, **kwargs):
         """Return the default scopes for the provided client."""
-        return ['annotation:read', 'annotation:write']
+        return DEFAULT_SCOPES
 
     def save_authorization_code(self, client_id, code, request, *args, **kwargs):
         client = self.find_client(client_id)

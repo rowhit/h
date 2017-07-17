@@ -19,6 +19,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import models
 from h.exceptions import OAuthTokenError
+from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
 from h.util.view import cors_json_view
 
@@ -59,8 +60,8 @@ class OAuthAuthorizeController(object):
                  effective_principals=security.Authenticated)
     def post(self):
         # We don't support scopes at the moment, but oauthlib does need a scope,
-        # so we're adding a hard-coded `annotation:read` and `annotation:write` scopes.
-        scopes = ['annotation:read', 'annotation:write']
+        # so we're explicitly overwriting whatever the client provides.
+        scopes = DEFAULT_SCOPES
         user = self.user_svc.fetch(self.request.authenticated_userid)
         credentials = {'user': user}
 

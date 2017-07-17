@@ -15,7 +15,10 @@ from h.exceptions import OAuthTokenError
 from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
 from h.services.oauth import oauth_service_factory
-from h.services.oauth_validator import oauth_validator_service_factory
+from h.services.oauth_validator import (
+    DEFAULT_SCOPES,
+    oauth_validator_service_factory,
+)
 from h.services.user import user_service_factory
 from h.util.datetime import utc_iso8601
 from h.views import api_auth as views
@@ -71,7 +74,7 @@ class TestOAuthAuthorizeController(object):
         oauth.create_authorization_response.assert_called_once_with(
             pyramid_request.url,
             credentials={'user': authenticated_user},
-            scopes=['annotation:read', 'annotation:write'])
+            scopes=DEFAULT_SCOPES)
 
     @pytest.mark.usefixtures('oauth')
     def test_post_redirects_to_client(self, controller, auth_client):
