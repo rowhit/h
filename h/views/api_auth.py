@@ -10,11 +10,7 @@ from oauthlib.oauth2 import (
     WebApplicationServer,
 )
 from pyramid import security
-from pyramid.httpexceptions import (
-    HTTPFound,
-    HTTPInternalServerError,
-    exception_response,
-)
+from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
 from h import models
