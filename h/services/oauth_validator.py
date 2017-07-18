@@ -26,6 +26,26 @@ class OAuthValidatorService(RequestValidator):
 
         self._cached_find_client = lru_cache_in_transaction(self.session)(self._find_client)
 
+    def client_authentication_required(self, request, *args, **kwargs):
+        """
+        Client authentication is generally not required.
+
+        This is mostly due to the nature of our clients running in a Browser JavaScript environment
+        where we can't safely store the `client_secret`.
+        """
+
+        client = self.find_client(request.client_id)
+        print('client', client)
+        if client is None:
+            # `authenticate_client_id` will not authenticate a missing client.
+            return False
+
+        print('client.secret', client.secret)
+        return (client.secret is not None)
+
+    def authenticate_client_id(self, client_id, request, *args, **kwargs):
+        """Authenticates a client_id, returns True if the client_id exists."""
+
     def find_client(self, id_):
         return self._cached_find_client(id_)
 
@@ -84,6 +104,9 @@ class OAuthValidatorService(RequestValidator):
         return (scopes == default_scopes)
 
     def _find_client(self, id_):
+        if id_ is None:
+            return None
+
         try:
             return self.session.query(models.AuthClient).get(id_)
         except StatementError:

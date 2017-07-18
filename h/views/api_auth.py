@@ -10,7 +10,7 @@ from oauthlib.oauth2 import (
     WebApplicationServer,
 )
 from pyramid import security
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, exception_response
 from pyramid.view import view_config, view_defaults
 
 from h import models
@@ -83,25 +83,45 @@ class OAuthAuthorizeErrorController(object):
         return {'description': self.context.description}
 
 
-@cors_json_view(route_name='token', request_method='POST')
-def access_token(request):
-    svc = request.find_service(name='oauth')
+class OAuthAccessTokenController(object):
+    def __init__(self, request):
+        self.request = request
 
-    user, authclient = svc.verify_token_request(request.POST)
-    token = svc.create_token(user, authclient)
+        validator = self.request.find_service(name='oauth_validator')
+        self.oauth = WebApplicationServer(validator)
 
-    response = {
-        'access_token': token.value,
-        'token_type': 'bearer',
-    }
+    @cors_json_view(route_name='token', request_method='POST')
+    def post(self):
+        headers, body, status = self.oauth.create_token_response(
+            self.request.url, self.request.method, self.request.POST, self.request.headers)
+        if status == 200:
+            return body
+        else:
+            raise exception_response(status, body=body)
+        print('response headers: ', headers)
+        print('response body:    ', body)
+        print('status:           ', status)
 
-    if token.expires:
-        response['expires_in'] = token.ttl
 
-    if token.refresh_token:
-        response['refresh_token'] = token.refresh_token
-
-    return response
+# @cors_json_view(route_name='token', request_method='POST')
+# def access_token(request):
+#     svc = request.find_service(name='oauth')
+#
+#     user, authclient = svc.verify_token_request(request.POST)
+#     token = svc.create_token(user, authclient)
+#
+#     response = {
+#         'access_token': token.value,
+#         'token_type': 'bearer',
+#     }
+#
+#     if token.expires:
+#         response['expires_in'] = token.ttl
+#
+#     if token.refresh_token:
+#         response['refresh_token'] = token.refresh_token
+#
+#     return response
 
 
 @cors_json_view(route_name='api.debug_token', request_method='GET')
