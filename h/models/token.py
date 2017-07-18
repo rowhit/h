@@ -67,10 +67,6 @@ class Token(Base, mixins.Timestamps):
 
     def __init__(self, **kwargs):
         super(Token, self).__init__(**kwargs)
-        self.regenerate()
-
-        if self.expires:
-            self.refresh_token = security.token_urlsafe()
 
     @property
     def expired(self):

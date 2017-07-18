@@ -657,13 +657,13 @@ class DeveloperController(object):
             self.request.authenticated_userid
         )
 
-        if token:
-            # The user already has an API token, regenerate it.
-            token.regenerate()
-        else:
+        if not token:
             # The user doesn't have an API token yet, generate one for them.
             token = models.Token(userid=self.request.authenticated_userid)
             self.request.db.add(token)
+
+        # (re) generate the users token
+        token.regenerate()
 
         return {'token': token.value}
 

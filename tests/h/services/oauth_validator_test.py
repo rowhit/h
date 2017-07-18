@@ -19,6 +19,22 @@ from h.services.oauth_validator import (
 )
 
 
+class TestClientAuthenticationRequired(object):
+    def test_returns_false_for_public_client(self, svc, factories):
+        client = factories.AuthClient()
+        request = mock.Mock(client_id=client.id, spec_set=['client_id'])
+        assert svc.client_authentication_required(request) is False
+
+    def test_returns_true_for_confidential_client(self, svc, factories):
+        client = factories.ConfidentialAuthClient()
+        request = mock.Mock(client_id=client.id, spec_set=['client_id'])
+        assert svc.client_authentication_required(request) is True
+
+    def test_returns_false_for_missing_client(self, svc):
+        request = mock.Mock(client_id=None, spec_set=['client_id'])
+        assert svc.client_authentication_required(request) is False
+
+
 class TestFindClient(object):
     def test_returns_client(self, svc, client):
         assert svc.find_client(client.id) == client
